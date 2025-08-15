@@ -1,151 +1,93 @@
+Data Analyst Agent 
+This is a robust, AI-powered data analyst agent designed for reliability and speed. It uses a powerful one-shot script generation model to analyze data and produce results, ensuring it passes complex evaluations.
 
-# **TDS Data Analyst Agent**
+This version is an overhaul of a previous ReAct-style agent, built to be simpler, faster, and more dependable.
 
-> 🧠 Autonomous AI-powered Data Analyst — source, prepare, analyze & visualize data from natural language instructions.
+🚀 Features
+Reliable Script Generation: Instead of a complex, multi-step reasoning process, the agent generates a single, complete Python script to solve the entire user request in one go. This massively reduces the points of failure.
 
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue?logo=python)
-![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)
-![Framework](https://img.shields.io/badge/Framework-Flask-orange?logo=flask)
+High Speed: The single-call architecture is significantly faster than conversational agents, with most requests completing in 15-30 seconds.
 
----
+One-Shot Prompting: The agent is guided by a highly-detailed system prompt that instructs it to act as a senior data scientist, ensuring it follows all requirements for data analysis, plotting, and output formatting.
 
-## 🚀 Overview
+Secure & Isolated Execution: Each generated script is run in a secure subprocess within a dedicated workspace for the request.
 
-The **TDS Data Analyst Agent** is a **Reason + Act (ReAct)** AI framework powered by an LLM that can dynamically perform **data sourcing, cleaning, analysis, and visualization**.
-It intelligently chooses tools, generates Python code, and executes it securely — handling everything from **web scraping** to **large dataset queries** and **custom charts**.
+Deployment Ready: Comes pre-configured with a Dockerfile and render.yaml for easy, one-click deployment to Render.
 
----
+⚙️ Project Structure
+/data-analyst-agent-v2/
+|
+├── agent/
+│   ├── __init__.py
+│   ├── generator.py        # Brain: Generates the Python script.
+│   ├── executor.py         # Hands: Executes the script.
+│   └── prompts.py          # Soul: Contains the core instructions for the AI.
+|
+├── workspaces/             # Auto-created for temporary request files.
+|
+├── app.py                  # The main Flask web server and API endpoint.
+├── requirements.txt        # List of all Python libraries needed.
+├── Dockerfile              # Blueprint for building the deployment container.
+├── render.yaml             # Specific instructions for deploying on Render.
+└── .gitignore              # Tells Git which files to ignore.
 
-## ✨ Features
+🛠️ Local Setup
+Prerequisites
+Python 3.9+
 
-* 🤖 **Agentic Framework** – LLM selects and uses tools based on tasks.
-* ⚡ **Dynamic Code Execution** – Generates Python code for Pandas, NumPy, Matplotlib, etc.
-* 🔒 **Secure Sandbox** – Isolated environment prevents malicious actions.
-* 🛠 **Toolbox**:
+Pip & Git
 
-  * Python REPL for data analysis
-  * Web Scraper for real-time data fetching
-  * File system tools for secure file handling
-* 🔄 **Resilience** – Detects errors, retries with self-corrections.
-* ☁ **Deployment Ready** – Pre-configured with Docker & Render YAML.
+Installation
+Clone the repository:
 
----
-
-## 📂 Project Structure
-
-```
-data-analyst-agent/
-│
-├── workspaces/         # Temp storage for each request
-│
-├── app.py              # Flask API application
-├── requirements.txt    # Dependencies
-├── Dockerfile          # Container build config
-├── render.yaml         # Render deployment config
-├── .gitignore
-├── LICENSE
-│
-└── agent/
-    ├── __init__.py
-    ├── agent.py        # ReAct agent logic
-    ├── prompts.py      # System prompts for LLM
-    └── tools.py        # Tool definitions
-```
-
----
-
-## ⚙️ Setup
-
-<details>
-<summary><strong>📌 Local Installation</strong></summary>
-
-**Prerequisites**
-
-* Python 3.9+
-* Pip
-* Git
-
-**Steps**
-
-```bash
-# Clone repository
 git clone <your-repo-url>
-cd data-analyst-agent
+cd data-analyst-agent-v2
 
-# Create virtual environment
+Create a virtual environment:
+
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
-# Install dependencies
+Install dependencies:
+
 pip install -r requirements.txt
 
-# Add your API key
-echo 'GENAI_API_KEY="your_google_ai_studio_api_key"' > .env
+Set up environment variables:
+Create a file named .env in the project root and add your Google API key:
 
-# Run the application
+GENAI_API_KEY="your_google_ai_studio_api_key"
+
+Run the application:
+
 gunicorn app:app
-```
 
-App runs on: `http://127.0.0.1:8000`
+The server will be running at http://127.0.0.1:8000.
 
-</details>
+☁️ Deployment to Render
+Push your project to a new public GitHub repository.
 
----
+Go to the Render Dashboard and create a New Web Service.
 
-## ☁ Deployment to Render
+Connect your GitHub repository.
 
-<details>
-<summary><strong>🚀 Render Deployment Guide</strong></summary>
+Render will automatically detect the render.yaml file. Give your service a name.
 
-1. Push code to a **public GitHub repo**.
-2. On **Render Dashboard** → Click **New Web Service**.
-3. Connect your repo.
-4. Render detects `render.yaml` → Configure service name → Deploy.
-5. Your API will be live at the provided Render URL.
+Go to the Environment tab and add a new Environment Variable:
 
-</details>
+Key: GENAI_API_KEY
 
----
+Value: Paste your Google API key.
 
-## 🧪 API Usage
+Click Create Web Service. Render will build and deploy your agent.
 
-**Endpoint:** `/api/`
-**Method:** `POST`
-**Type:** `multipart/form-data`
+🧪 API Usage
+Send a POST request to the /api/ endpoint with multipart/form-data.
 
-**Required:**
+Required file: questions.txt (contains the prompt)
 
-* `questions.txt` → Contains natural language instructions for the agent.
+Optional files: Any data files needed for the analysis (e.g., sample-sales.csv).
 
-**Optional:**
-
-* Additional data files (CSV, PNG, etc.) for analysis.
-
-**Example Request:**
-
-```bash
+cURL Example:
 curl -X POST https://your-render-app-url/api/ \
      -F "questions.txt=@path/to/questions.txt" \
-     -F "data.csv=@path/to/data.csv"
-```
-
-**Example Response:**
-
-```json
-{
-  "status": "success",
-  "answers": [
-    "Data summary generated...",
-    "Visualization saved as chart.png"
-  ]
-}
-```
-
----
-
-## 📜 License
-
-This project is licensed under the **MIT License**. See [LICENSE](LICENSE) for details.
-
----
+     -F "sample-sales.csv=@path/to/sample-sales.csv"
